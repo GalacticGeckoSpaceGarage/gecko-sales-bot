@@ -1,0 +1,29 @@
+[
+  {
+    "events": {
+      "nft": {
+        "amount": 20000000000,
+        "buyer": "D9BjJAxC3G13scq9X4bezXzTyAt6kSH2v4MfBWzUHDUo",
+        "description": "ace57VbeyGrJWQSvD8LqKiyfrvsxFUaskp8ykYAwAaP sold Gecko #629 to D9BjJAxC3G13scq9X4bezXzTyAt6kSH2v4MfBWzUHDUo for 20 SOL on MAGIC_EDEN.",
+        "fee": 10919,
+        "feePayer": "D9BjJAxC3G13scq9X4bezXzTyAt6kSH2v4MfBWzUHDUo",
+        "nfts": [
+          {
+            "mint": "5rgMSWum71n5Nf6ZPxeCzKam1zaGfY5xXeQsAt6pvc5Z",
+            "tokenStandard": "ProgrammableNonFungible"
+          }
+        ],
+        "saleType": "INSTANT_SALE",
+        "seller": "ace57VbeyGrJWQSvD8LqKiyfrvsxFUaskp8ykYAwAaP",
+        "signature": "RLHm3gqs6KAWxWTYGJCHfpP6JAwXC9KH5wNx9Jmf3o3xnRdRwE2TrKL8GeVoC9aGSxivYiaT5XywF6Nt4bD8nZU",
+        "slot": 296816742,
+        "source": "MAGIC_EDEN",
+        "staker": "",
+        "timestamp": 1729490034,
+        "type": "NFT_SALE"
+      }
+    },
+    "type": "NFT_SALE",
+    "isTesting": true
+  }
+]
