@@ -4,6 +4,10 @@ This project is a Cloudflare Worker that listens to Gecko NFT sales events via
 Helius webhooks and sends notifications to a Telegram chat. It's based on the
 [Helius Cloudflare Telegram template](https://github.com/helius-labs/cloudfare-telegram-template).
 
+<p align="center">
+  <img src="./src/assets/screenshot.jpeg" alt="Gecko Sales Bot Screenshot" width="300">
+</p>
+
 ## Setup Instructions
 
 1. Clone this repository:
