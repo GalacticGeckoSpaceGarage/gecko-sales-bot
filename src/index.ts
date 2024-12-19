@@ -1,33 +1,9 @@
 import { Hono } from "hono";
+import type { Env } from "./env";
+import { type WebhookData, WebhookService } from "./services/webhook.service";
 import { mintToNftIdMap } from "./utils/mint-to-nft-id-map";
-import { mintToRankMap } from "./utils/mint-to-rank-map";
-
-type Env = {
-  HELIUS_API_KEY: string;
-  TELEGRAM_BOT_TOKEN: string;
-  TELEGRAM_CHAT_ID: string;
-  AUTH_TOKEN: string;
-};
 
 const app = new Hono<{ Bindings: Env }>();
-
-interface WebhookData {
-  type: string;
-  events: {
-    nft: {
-      amount: number;
-      buyer: string;
-      seller: string;
-      signature: string;
-      nfts: {
-        mint: string;
-        tokenStandard: string;
-      }[];
-      source: string;
-    };
-  };
-  isTesting?: boolean;
-}
 
 app.get("/", (c) => c.text("Solana Action Bot is running!"));
 
@@ -63,30 +39,6 @@ app.post("/create-webhook", async (c) => {
   return c.json({ success: true, webhook: data, webhookURL: webhookURL });
 });
 
-async function sendTelegramMessage(
-  message: string,
-  env: Env,
-  imageUrl: string,
-) {
-  const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chat_id: env.TELEGRAM_CHAT_ID,
-      text: message,
-      parse_mode: "Markdown",
-      link_preview_options: {
-        url: imageUrl,
-        show_above_text: true,
-      },
-    }),
-  });
-  return response.json();
-}
-
 app.post("/webhook", async (c) => {
   const authToken = c.req.header("Authorization");
   if (authToken !== c.env.AUTH_TOKEN) {
@@ -107,63 +59,13 @@ app.post("/webhook", async (c) => {
     return c.text("No transactions to process", 200);
   }
 
+  const webhookService = new WebhookService(c.env);
+
   for (const transaction of data) {
-    if (transaction.type === "NFT_SALE" || transaction.type === "SWAP") {
-      const { amount, buyer, seller, signature, nfts, source } =
-        transaction.events.nft;
-
-      const mint = nfts?.[0]?.mint;
-      if (!mint) {
-        console.log("No mint found in transaction");
-        continue;
-      }
-
-      const nftId = mintToNftIdMap[mint];
-      if (!nftId) {
-        console.log("No nftId found in transaction");
-        continue;
-      }
-
-      const imageUrl = `https://galacticgeckoz.nyc3.cdn.digitaloceanspaces.com/gecko-images/${nftId}.jpg`;
-      if (!imageUrl) {
-        console.log("No imageUrl found in transaction");
-        continue;
-      }
-
-      const rank = mintToRankMap[mint];
-      if (!rank) {
-        console.log("No rank found in transaction");
-        continue;
-      }
-
-      const sourceString = source
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-      if (!sourceString) {
-        console.log("No sourceString found in transaction");
-        continue;
-      }
-
-      const message = `🎉 *Gecko #${nftId} - RANK ${rank} - collected on ${sourceString}*
-
-*Price*: ${amount / 1e9} SOL
-*Buyer*: \`${buyer}\`
-*Seller*: \`${seller}\`
-*Signature*: [View on Solscan](https://solscan.io/tx/${signature})`;
-
-      console.log("Sending Telegram message:", message);
-
-      if (transaction?.isTesting) {
-        console.log("Skipping Telegram message for testing");
-        continue;
-      }
-
-      try {
-        const result = await sendTelegramMessage(message, c.env, imageUrl);
-        console.log("Telegram message sent:", result);
-      } catch (error) {
-        console.error("Error sending Telegram message:", error);
-      }
+    try {
+      await webhookService.processTransaction(transaction);
+    } catch (error) {
+      console.error("Error processing transaction:", error);
     }
   }
 
