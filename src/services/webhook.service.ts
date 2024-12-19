@@ -120,7 +120,7 @@ export class WebhookService {
       return;
     }
 
-    const imageUrl = `https://galacticgeckoz.nyc3.cdn.digitaloceanspaces.com/gecko-images/${nftId}.jpg`;
+    const imageUrl = `https://cdn.galacticgeckos.com/${nftId}.jpg`;
     const sourceString = this.formatSource(source);
     const message = this.formatMessage(
       nftId,
